@@ -1,0 +1,64 @@
+﻿@using CodingChallenge.Models
+
+
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Users</h2>
+    @Html.DropDownList("FK_USER", null, "--", htmlAttributes: new { @class = "form-control" })
+
+<div id="CONTENT">
+</div>
+
+<script type="text/javascript">
+
+
+    $("#FK_USER").change(function () {
+        let $this = this;
+        $.ajax({
+            url: "Challenge/GetProject",
+            type: "POST",
+            data: { Id: $this.value },
+            dataType: "Json",  
+            success: function (result) {
+                let html = "<table border=\"1\"><tr><th>Project Id</th><th>Start Date</th><th>Time To Start</th><th>End Date</th><th>Credits</th><th>Status</th></tr>";
+
+                for (var k in result) {
+                    let StartDate = new Date(parseInt(result[k].Pr.StartDate.substring(6, 19)));
+                    let EndDate = new Date(parseInt(result[k].Pr.EndDate.substring(6, 19)));
+
+                    
+                    html += "<tr>";
+                    html += "<td>" + result[k].Pr.Id + "</td>";
+                    html += "<td>" + StartDate.toLocaleString() + "</td>";
+                    if (parseInt(result[k].Pr.StartDate.substring(6, 19)) < parseInt(result[k].UsPr.AssignedDate.substring(6, 19))) {
+                        html += "<td>Started</td>";
+                    }
+                    else {
+                        let days = (parseInt(result[k].Pr.StartDate.substring(6, 19)) - parseInt(result[k].UsPr.AssignedDate.substring(6, 19))) / 86400/1000;
+                        html += "<td>" + days + "</td>";
+                    }
+                    html += "<td>" + EndDate.toLocaleString() + "</td>";
+                    html += "<td>" + result[k].Pr.Credits + "</td>";
+                    if (result[k].UsPr.IsActive == true) {
+                        html += "<td>Active</td>";
+                    }
+                    else {
+
+                        html += "<td>Inactive</td>";
+                    }
+                    html += "</tr>";
+                }
+                html += "</table>";
+                $("#CONTENT").html(html);
+
+            },
+            error: function () {
+                $("#CONTENT").html("");
+            }
+        });
+    });
+
+</script>
